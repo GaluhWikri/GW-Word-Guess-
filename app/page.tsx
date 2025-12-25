@@ -55,6 +55,26 @@ export default function WordGuessGame() {
     return { nextWord, nextUsed }
   }
 
+  const getInitialHints = (word: string): Set<string> => {
+    // Filter out non-letter characters (like spaces)
+    const letters = Array.from(new Set(word.split("").filter((char) => /[A-Z]/.test(char))))
+    const hints = new Set<string>()
+
+    // Determine number of hints (1 or 2)
+    // If word has few unique letters, don't reveal too much
+    const maxHints = Math.min(2, Math.max(1, Math.floor(letters.length / 2)))
+    const numHints = word.length > 5 ? 2 : 1
+
+    // Safely pick random letters
+    while (hints.size < numHints && letters.length > 0) {
+      const randomIndex = Math.floor(Math.random() * letters.length)
+      hints.add(letters[randomIndex])
+      letters.splice(randomIndex, 1) // Remove used letter
+    }
+
+    return hints
+  }
+
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId)
     setStreak(0)
@@ -63,7 +83,7 @@ export default function WordGuessGame() {
 
     setCurrentWord(nextWord)
     setUsedWords(nextUsed)
-    setGuessedLetters(new Set())
+    setGuessedLetters(getInitialHints(nextWord))
     setLives(MAX_LIVES)
     setGameStatus("playing")
   }
@@ -74,7 +94,7 @@ export default function WordGuessGame() {
       const { nextWord, nextUsed } = pickWord(selectedCategory, usedWords)
       setCurrentWord(nextWord)
       setUsedWords(nextUsed)
-      setGuessedLetters(new Set())
+      setGuessedLetters(getInitialHints(nextWord))
       setLives(MAX_LIVES)
       setGameStatus("playing")
     } else {
@@ -99,7 +119,11 @@ export default function WordGuessGame() {
       }
     } else {
       // Check if word is complete
-      const allLettersGuessed = currentWord.split("").every((char) => newGuessedLetters.has(char))
+      const allLettersGuessed = currentWord.split("").every((char) => {
+        // Ignore spaces in completion check if they aren't already handled (usually spaces are automatically shown or ignored)
+        if (!/[A-Z]/.test(char)) return true
+        return newGuessedLetters.has(char)
+      })
       if (allLettersGuessed) {
         setGameStatus("won")
         setStreak((prev) => prev + 1)
@@ -154,8 +178,11 @@ export default function WordGuessGame() {
           <CategorySelector categories={CATEGORIES} onSelect={handleCategorySelect} />
         ) : (
           <div className="w-full max-w-2xl space-y-12 backdrop-blur-sm bg-white/30 p-8 rounded-3xl border border-white/40 shadow-xl">
-            {/* Lives Indicator */}
-            <div className="flex justify-center">
+            {/* Header Section: Category & Lives */}
+            <div className="flex flex-col items-center gap-6">
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-indigo-100/80 text-indigo-700 shadow-sm border border-indigo-200 backdrop-blur-md">
+                {CATEGORIES.find((c) => c.id === selectedCategory)?.label}
+              </span>
               <LivesIndicator lives={lives} maxLives={MAX_LIVES} />
             </div>
 
