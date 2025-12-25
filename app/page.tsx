@@ -158,16 +158,22 @@ export default function WordGuessGame() {
             <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-800 flex items-center gap-2 drop-shadow-sm">
               <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Word</span>Guess
             </h1>
-            {streak > 0 && (
-              <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4 duration-500">
-                <span className="text-sm text-slate-500 font-bold uppercase tracking-wider hidden md:block">Streak</span>
-                <div className="flex items-center justify-center min-w-[3rem] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold px-4 py-1.5 rounded-full text-sm shadow-md ring-2 ring-white transform hover:scale-105 transition-transform duration-200">
-                  {streak}
-                  <span className="ml-1">🔥</span>
+            <div className="flex flex-col items-end gap-1.5 min-w-[140px]">
+              <div className="flex items-center justify-between w-full px-1">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Streak</span>
+                <div className="flex items-center gap-1 text-xs font-bold text-slate-700">
+                  {streak} <span className="text-orange-500 text-sm">🔥</span>
                 </div>
               </div>
-            )}
-            {streak === 0 && <div className="w-8"></div>}
+              {/* Progress Bar Container */}
+              <div className="h-3 w-full bg-white/50 rounded-full overflow-hidden shadow-inner ring-1 ring-black/5 p-0.5 backdrop-blur-sm">
+                {/* Visual Bar */}
+                <div
+                  className={`h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-500 ease-out shadow-sm ${streak > 0 ? 'opacity-100' : 'opacity-0'}`}
+                  style={{ width: `${Math.max(5, Math.min(100, (streak / 10) * 100))}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </header>
